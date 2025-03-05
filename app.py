@@ -4,11 +4,11 @@ import joblib
 
 # Load saved models
 models = {
-    "Random Forest": joblib.load("DD/Random Forest.pkl"),
-    "Decision Tree": joblib.load("DD/Decision Tree.pkl"),
-    "Naive Bayes": joblib.load("DD/Naive Bayes.pkl"),
-    "Logistic Regression": joblib.load("DD/Logistic Regression.pkl"),
-    "SVM": joblib.load("DD/SVM.pkl")
+    "Random Forest": joblib.load("Random Forest.pkl"),
+    "Decision Tree": joblib.load("Decision Tree.pkl"),
+    "Naive Bayes": joblib.load("Naive Bayes.pkl"),
+    "Logistic Regression": joblib.load("Logistic Regression.pkl"),
+    "SVM": joblib.load("SVM.pkl")
 }
 
 # Load dataset structure for input fields
