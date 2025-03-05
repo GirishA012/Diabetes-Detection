@@ -1,18 +1,23 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import os
 
-# Load saved models
+# Get the base directory of the script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Load saved models with correct paths
 models = {
-    "Random Forest": joblib.load("Random Forest.pkl"),
-    "Decision Tree": joblib.load("Decision Tree.pkl"),
-    "Naive Bayes": joblib.load("Naive Bayes.pkl"),
-    "Logistic Regression": joblib.load("Logistic Regression.pkl"),
-    "SVM": joblib.load("SVM.pkl")
+    "Random Forest": joblib.load(os.path.join(BASE_DIR, "Random_Forest.pkl")),
+    "Decision Tree": joblib.load(os.path.join(BASE_DIR, "Decision_Tree.pkl")),
+    "Naive Bayes": joblib.load(os.path.join(BASE_DIR, "Naive_Bayes.pkl")),
+    "Logistic Regression": joblib.load(os.path.join(BASE_DIR, "Logistic_Regression.pkl")),
+    "SVM": joblib.load(os.path.join(BASE_DIR, "SVM.pkl"))
 }
 
 # Load dataset structure for input fields
-df = pd.read_csv(r"C:\Users\ASUS\Downloads\DD\diabetes-dataset.csv")
+csv_path = os.path.join(BASE_DIR, "diabetes-dataset.csv")
+df = pd.read_csv(csv_path)
 features = df.columns[:-1]  # Assuming the last column is the target variable
 
 # Streamlit UI
@@ -20,9 +25,7 @@ st.title("Diabetes Prediction App")
 st.write("Select a model and enter the required values to get a prediction.")
 
 # User input fields
-user_input = {}
-for feature in features:
-    user_input[feature] = st.number_input(f"Enter {feature}", value=0.0)
+user_input = {feature: st.number_input(f"Enter {feature}", value=0.0) for feature in features}
 
 # Model selection
 selected_model = st.selectbox("Select a model", list(models.keys()))
