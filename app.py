@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import joblib
+from sklearn.preprocessing import LabelEncoder
 
 # Define the absolute path to the model folder
 MODEL_DIR = r"C:\Users\ASUS\Downloads\DD"
@@ -37,28 +38,36 @@ for feature in features:
     user_input[feature] = st.number_input(f"Enter {feature}", value=0.0)
 
 # **Apply Feature Engineering (Same as in Model Training)**
+
+
 def preprocess_input(data):
     df = pd.DataFrame([data])
 
-    # Age Binning
-    df["Age_Group"] = pd.cut(df["Age"], bins=[0, 30, 50, 100], labels=["Young", "Middle", "Old"])
+    df['BMI_Category'] = pd.cut(df['BMI'], bins=[0, 18.5, 24.9, 29.9, 100], labels=['Underweight', 'Normal', 'Overweight', 'Obese'])
 
-    # BMI Binning
-    df["BMI_Category"] = pd.cut(df["BMI"], bins=[0, 18.5, 25, 30, 100], labels=["Underweight", "Normal", "Overweight", "Obese"])
+    df['Age_Group'] = pd.cut(df['Age'], bins=[20, 30, 40, 50, 60, 100], labels=['20s', '30s', '40s', '50s', '60+'])
 
-    # Blood Pressure Binning
-    df["BP_Category"] = pd.cut(df["BloodPressure"], bins=[0, 60, 80, 120], labels=["Low", "Normal", "High"])
+    df['BP_Category'] = pd.cut(df['BloodPressure'], bins=[0, 60, 80, 90, 200], labels=['Low', 'Normal', 'Pre-Hypertension', 'Hypertension'])
 
-    # SkinThickness Transformation
-    df["High_SkinThickness"] = (df["SkinThickness"] > 23).astype(int)
+    df['High_SkinThickness'] = (df['SkinThickness'] > df['SkinThickness'].median()).astype(int)
 
-    # Pedigree Function Risk
-    df["Pedigree_Risk"] = (df["DiabetesPedigreeFunction"] > 0.5).astype(int)
+    df['Pedigree_Risk'] = pd.cut(df['DiabetesPedigreeFunction'], bins=[0, 0.5, 1.0, 2.5], labels=['Low', 'Medium', 'High'])
 
-    # Drop original columns if they were not used in training
+# ---- Label Encoding ----
+    label_encoder = LabelEncoder()
+    categorical_features = ['BMI_Category', 'Age_Group', 'BP_Category', 'Pedigree_Risk']
+
+    for col in categorical_features:
+        df[col] = label_encoder.fit_transform(df[col])
+
     df = df.drop(["Age", "BMI", "BloodPressure", "SkinThickness", "DiabetesPedigreeFunction"], axis=1)
 
+
+
+
+
     return df
+
 
 # Model selection
 selected_model = st.selectbox("Select a model", list(models.keys()))
