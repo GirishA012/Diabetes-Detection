@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import joblib
+import tensorflow as tf
 from sklearn.preprocessing import LabelEncoder
 
 # Define the absolute path to the model folder
@@ -20,7 +21,16 @@ try:
         "Logistic Regression": joblib.load(os.path.join(MODEL_DIR, "Logistic_Regression.pkl")),
         "SVM": joblib.load(os.path.join(MODEL_DIR, "SVM.pkl"))
     }
-    print("✅ Models loaded successfully!")
+    
+    # Load ANN model
+    ann_model_path = os.path.join(MODEL_DIR, "ann_model.h5")
+    if os.path.exists(ann_model_path):
+        models["Artificial Neural Network"] = tf.keras.models.load_model(ann_model_path)
+        print("✅ ANN model loaded successfully!")
+    else:
+        st.error("❌ ANN model file not found!")
+
+    print("✅ All models loaded successfully!")
 except FileNotFoundError as e:
     print(f"❌ Error: {e}")
     raise
@@ -38,36 +48,25 @@ for feature in features:
     user_input[feature] = st.number_input(f"Enter {feature}", value=0.0)
 
 # **Apply Feature Engineering (Same as in Model Training)**
-
-
 def preprocess_input(data):
     df = pd.DataFrame([data])
 
     df['BMI_Category'] = pd.cut(df['BMI'], bins=[0, 18.5, 24.9, 29.9, 100], labels=['Underweight', 'Normal', 'Overweight', 'Obese'])
-
     df['Age_Group'] = pd.cut(df['Age'], bins=[20, 30, 40, 50, 60, 100], labels=['20s', '30s', '40s', '50s', '60+'])
-
     df['BP_Category'] = pd.cut(df['BloodPressure'], bins=[0, 60, 80, 90, 200], labels=['Low', 'Normal', 'Pre-Hypertension', 'Hypertension'])
-
     df['High_SkinThickness'] = (df['SkinThickness'] > df['SkinThickness'].median()).astype(int)
-
     df['Pedigree_Risk'] = pd.cut(df['DiabetesPedigreeFunction'], bins=[0, 0.5, 1.0, 2.5], labels=['Low', 'Medium', 'High'])
 
-# ---- Label Encoding ----
+    # ---- Label Encoding ----
     label_encoder = LabelEncoder()
     categorical_features = ['BMI_Category', 'Age_Group', 'BP_Category', 'Pedigree_Risk']
-
+    
     for col in categorical_features:
         df[col] = label_encoder.fit_transform(df[col])
 
     df = df.drop(["Age", "BMI", "BloodPressure", "SkinThickness", "DiabetesPedigreeFunction"], axis=1)
 
-
-
-
-
     return df
-
 
 # Model selection
 selected_model = st.selectbox("Select a model", list(models.keys()))
@@ -76,6 +75,15 @@ selected_model = st.selectbox("Select a model", list(models.keys()))
 if st.button("Predict"):
     model = models[selected_model]
     processed_input = preprocess_input(user_input)  # Apply transformations
-    prediction = model.predict(processed_input)[0]
-    result = "Diabetic" if prediction == 1 else "Non-Diabetic"
+
+    if selected_model == "Artificial Neural Network":
+        # Ensure correct input shape for TensorFlow
+        processed_input = processed_input.values.reshape(1, -1)
+
+        prediction = model.predict(processed_input).item()  # Extract single float value
+        result = "Diabetic" if prediction >= 0.5 else "Non-Diabetic"
+    else:
+        prediction = model.predict(processed_input)[0]
+        result = "Diabetic" if prediction == 1 else "Non-Diabetic"
+
     st.success(f"The model predicts: {result}")
