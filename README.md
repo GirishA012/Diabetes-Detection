@@ -29,6 +29,10 @@ Each model's accuracy was evaluated and compared using graphical visualizations.
 - Visual representation of results using graphs  
 - ANN model fine-tuned for improved performance  
 
+## 🌐 Deployment  
+- This project was hosted on **Streamlit** for interactive visualization.  
+- The code for deployment is included in the repository.  
+
 ## 🚀 Technologies Used  
 - **Python**  
 - **Libraries:**  
@@ -36,6 +40,7 @@ Each model's accuracy was evaluated and compared using graphical visualizations.
   - Matplotlib, Seaborn (Visualization)  
   - Scikit-Learn (ML Models)  
   - TensorFlow/Keras (ANN Implementation)  
+  - Streamlit (Web App Deployment)  
 
 ## 🏁 Conclusion  
 This project successfully demonstrates the effectiveness of different ML algorithms in detecting diabetes and highlights the potential of ANN for improved accuracy.
